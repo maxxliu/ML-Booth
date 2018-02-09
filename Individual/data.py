@@ -115,7 +115,10 @@ def load_data():
     # first want to load the training data
     df_train = pd.read_csv(OUTPUT_TRAIN)
     train_y = df_train['SalePrice']
-    train_x = df_train.drop(columns=['SalePrice'])
+    try:
+        train_x = df_train.drop(columns=['SalePrice'])
+    except:
+        train_x = df_train.drop("SalePrice", axis=1)
     # confirm that we have removed SalePrice from x training data
     if 'SalePrice' in train_x.columns:
         print('ERROR: SalePrice was not removed from the training data')

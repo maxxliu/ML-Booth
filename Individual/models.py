@@ -153,55 +153,55 @@ def random_forest():
     print("R^2:                 %f" % r2)
 
 
-def final_model():
-    '''
-    train the final chosen model using all of the training data
-    take those optimal parameters and predict the values of the test set
-    put the predicted values into a csv file
-    done.
-    '''
-    # final chosen model is random forest regressor
-    # random forest parameters
-    kFold = 5
-    param_grid = {'n_estimators': np.arange(5, 40, 5),
-                    'max_features': np.array(['auto', 'sqrt', 'log2']),
-                    'max_depth': np.arange(2, 30)}
-    forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
-
-    # train using the all of the training cleaned data
-    y_np, x_np, df = load_data()
-    y_np_c, x_np_c, df_c = clean_data(df)
-
-    forest_grid.fit(x_np_c, y_np_c)
-    best_n = forest_grid.best_params_['n_estimators']
-    best_f = forest_grid.best_params_['max_features']
-    best_d = forest_grid.best_params_['max_depth']
-
-    print("Best n estimators:   %f" % best_n)
-    print("Best max features:   %s" % best_f)
-    print("Best max depth:      %f" % best_d)
-
-    # train a model using these best parameters
-    forest_model = RandomForestRegressor(n_estimators=best_n,
-                                        max_features=best_f,
-                                        max_depth=best_d)
-    forest_model.fit(x_np_c, y_np_c)
-
-    # import the test dataset
-    df_test = pd.read_csv("bike_test.csv")
-    # clean the data, the clean data function doesnt work for this dataframe
-    for feature in CONTINUOUS:
-        df_test[feature] = (df_test[feature] - df_test[feature].mean()) / \
-                        (df_test[feature].max() - df_test[feature].min())
-    df_test = df_test.drop(columns=['daylabel'])
-    df_test_np = df_test.values
-
-    # predict the values using our trained model
-    y_predict = forest_model.predict(df_test_np)
-
-    np.savetxt("hw2-1-maxliu.csv", y_predict, delimiter=",")
-
-    return df_test, df_test_np
+# def final_model():
+#     '''
+#     train the final chosen model using all of the training data
+#     take those optimal parameters and predict the values of the test set
+#     put the predicted values into a csv file
+#     done.
+#     '''
+#     # final chosen model is random forest regressor
+#     # random forest parameters
+#     kFold = 5
+#     param_grid = {'n_estimators': np.arange(5, 40, 5),
+#                     'max_features': np.array(['auto', 'sqrt', 'log2']),
+#                     'max_depth': np.arange(2, 30)}
+#     forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
+#
+#     # train using the all of the training cleaned data
+#     y_np, x_np, df = load_data()
+#     y_np_c, x_np_c, df_c = clean_data(df)
+#
+#     forest_grid.fit(x_np_c, y_np_c)
+#     best_n = forest_grid.best_params_['n_estimators']
+#     best_f = forest_grid.best_params_['max_features']
+#     best_d = forest_grid.best_params_['max_depth']
+#
+#     print("Best n estimators:   %f" % best_n)
+#     print("Best max features:   %s" % best_f)
+#     print("Best max depth:      %f" % best_d)
+#
+#     # train a model using these best parameters
+#     forest_model = RandomForestRegressor(n_estimators=best_n,
+#                                         max_features=best_f,
+#                                         max_depth=best_d)
+#     forest_model.fit(x_np_c, y_np_c)
+#
+#     # import the test dataset
+#     df_test = pd.read_csv("bike_test.csv")
+#     # clean the data, the clean data function doesnt work for this dataframe
+#     for feature in CONTINUOUS:
+#         df_test[feature] = (df_test[feature] - df_test[feature].mean()) / \
+#                         (df_test[feature].max() - df_test[feature].min())
+#     df_test = df_test.drop(columns=['daylabel'])
+#     df_test_np = df_test.values
+#
+#     # predict the values using our trained model
+#     y_predict = forest_model.predict(df_test_np)
+#
+#     np.savetxt("hw2-1-maxliu.csv", y_predict, delimiter=",")
+#
+#     return df_test, df_test_np
 
 if __name__ == '__main__':
     run_models()
