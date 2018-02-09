@@ -4,16 +4,19 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor
+from sklearn.svm import SVR
 
 def run_models():
     '''
     runs the different models
     '''
-    tree_regression()
-    print("_______________")
-    random_forest()
-    print("_______________")
-    adaboost_regression()
+    # tree_regression()
+    # print("_______________")
+    # random_forest()
+    # print("_______________")
+    # adaboost_regression()
+    # print("_______________")
+    svm_regression()
     print("_______________")
 
 
@@ -146,6 +149,51 @@ def random_forest():
     y_predict = forest_model.predict(x_test)
     mse = mean_squared_error(y_predict, y_test)
     r2 = forest_model.score(x_test, y_test)
+
+    print("Performance of random forest regression")
+    print("Mean Squared Error:  %f" % mse)
+    print("RMSE:                %f" % (mse ** 0.5))
+    print("R^2:                 %f" % r2)
+
+
+def svm_regression():
+    '''
+    runs a support vector regression
+    '''
+    print("Currently running Support Vector Regression")
+    train_x, train_y, _ = load_data()
+    # convert to np array
+    train_x = train_x.values
+    train_y = train_y.values
+    # convert the y values to log
+    train_y = log_transform(train_y, "forward")
+    # split the data
+    x_train, x_test, y_train, y_test = split_data(train_x, train_y)
+
+    # support vector regression
+    kFold = 5
+    param_grid = {'C': np.arange(0.1, 1.1, 0.1),
+                    'epsilon': np.arange(0.1, 1.1, 0.1),
+                    'kernel': ['linear', 'rbf', 'poly', 'sigmoid', 'precomputed']}
+    svr_grid = GridSearchCV(SVR(), param_grid, cv=kFold)
+
+    # test using training data
+    svr_grid.fit(x_train, y_train)
+    best_c = svr_grid.best_params_['C']
+    best_e = svr_grid.best_params_['epsilon']
+    best_k = svr_grid.best_params_['kernel']
+
+    print("Best C:          %f" % best_c)
+    print("Best epsilon:    %s" % best_e)
+    print("Best kernel:     %f" % best_k)
+
+    # train a model using these best parameters
+    svr_model = SVR(C=best_c, epsilon=best_e, kernel=best_k)
+    svr_model.fit(x_train, y_train)
+
+    y_predict = svr_model.predict(x_test)
+    mse = mean_squared_error(y_predict, y_test)
+    r2 = svr_model.score(x_test, y_test)
 
     print("Performance of random forest regression")
     print("Mean Squared Error:  %f" % mse)
