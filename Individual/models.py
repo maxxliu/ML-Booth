@@ -184,8 +184,8 @@ def svm_regression():
     best_k = svr_grid.best_params_['kernel']
 
     print("Best C:          %f" % best_c)
-    print("Best epsilon:    %s" % best_e)
-    print("Best kernel:     %f" % best_k)
+    print("Best epsilon:    %f" % best_e)
+    print("Best kernel:     %s" % best_k)
 
     # train a model using these best parameters
     svr_model = SVR(C=best_c, epsilon=best_e, kernel=best_k)
