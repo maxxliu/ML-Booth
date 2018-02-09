@@ -10,9 +10,9 @@ def run_models():
     '''
     runs the different models
     '''
-    # tree_regression()
+    tree_regression()
     print("_______________")
-    # random_forest()
+    random_forest()
     print("_______________")
     # adaboost_regression()
     # print("_______________")
@@ -79,8 +79,8 @@ def adaboost_regression():
     # adaboost parameters
     kFold = 5
     param_grid = {'loss': np.array(['linear', 'square', 'exponential']),
-                    'learning_rate': np.arange(0.25, 1.25, 0.25),
-                    'n_estimators': np.arange(300, 500, 50)}
+                    'learning_rate': np.arange(1, 101, 5)/100,
+                    'n_estimators': np.arange(40, 400, 20)}
     adaboost_grid = GridSearchCV(AdaBoostRegressor(), param_grid, cv=kFold)
 
     # test using the training data
@@ -125,21 +125,25 @@ def random_forest():
 
     # random forest parameters
     kFold = 5
-    param_grid = {'n_estimators': np.arange(400, 800, 100),
-                    'max_features': np.array(['auto', 'sqrt', 'log2'])}
+    param_grid = {'n_estimators': np.arange(5, 40, 5),
+                    'max_features': np.array(['auto', 'sqrt', 'log2']),
+                    'max_depth': np.arange(2, 30)}
     forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
 
     # test using training data
     forest_grid.fit(x_train, y_train)
     best_n = forest_grid.best_params_['n_estimators']
     best_f = forest_grid.best_params_['max_features']
+    best_d = forest_grid.best_params_['max_depth']
 
     print("Best n estimators:   %f" % best_n)
     print("Best max features:   %s" % best_f)
+    print("Best max depth:      %f" % best_d)
 
     # train a model using these best parameters
     forest_model = RandomForestRegressor(n_estimators=best_n,
-                                        max_features=best_f)
+                                        max_features=best_f,
+                                        max_depth=best_d)
     forest_model.fit(x_train, y_train)
 
     y_predict = forest_model.predict(x_test)
@@ -168,9 +172,9 @@ def svm_regression():
 
     # support vector regression
     kFold = 5
-    param_grid = {'C': np.arange(0.25, 1.25, 0.25),
-                    'epsilon': np.arange(0.25, 1.25, 0.25),
-                    'kernel': ['rbf', 'poly', 'sigmoid']}
+    param_grid = {'C': np.arange(0.1, 1.1, 0.1),
+                    'epsilon': np.arange(0.1, 1.1, 0.1),
+                    'kernel': ['linear', 'rbf', 'poly', 'sigmoid', 'precomputed']}
     svr_grid = GridSearchCV(SVR(), param_grid, cv=kFold)
 
     # test using training data
@@ -197,55 +201,74 @@ def svm_regression():
     print("R^2:                 %f" % r2)
 
 
-# def final_model():
-#     '''
-#     train the final chosen model using all of the training data
-#     take those optimal parameters and predict the values of the test set
-#     put the predicted values into a csv file
-#     done.
-#     '''
-#     # final chosen model is random forest regressor
-#     # random forest parameters
-#     kFold = 5
-#     param_grid = {'n_estimators': np.arange(5, 40, 5),
-#                     'max_features': np.array(['auto', 'sqrt', 'log2']),
-#                     'max_depth': np.arange(2, 30)}
-#     forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
-#
-#     # train using the all of the training cleaned data
-#     y_np, x_np, df = load_data()
-#     y_np_c, x_np_c, df_c = clean_data(df)
-#
-#     forest_grid.fit(x_np_c, y_np_c)
-#     best_n = forest_grid.best_params_['n_estimators']
-#     best_f = forest_grid.best_params_['max_features']
-#     best_d = forest_grid.best_params_['max_depth']
-#
-#     print("Best n estimators:   %f" % best_n)
-#     print("Best max features:   %s" % best_f)
-#     print("Best max depth:      %f" % best_d)
-#
-#     # train a model using these best parameters
-#     forest_model = RandomForestRegressor(n_estimators=best_n,
-#                                         max_features=best_f,
-#                                         max_depth=best_d)
-#     forest_model.fit(x_np_c, y_np_c)
-#
-#     # import the test dataset
-#     df_test = pd.read_csv("bike_test.csv")
-#     # clean the data, the clean data function doesnt work for this dataframe
-#     for feature in CONTINUOUS:
-#         df_test[feature] = (df_test[feature] - df_test[feature].mean()) / \
-#                         (df_test[feature].max() - df_test[feature].min())
-#     df_test = df_test.drop(columns=['daylabel'])
-#     df_test_np = df_test.values
-#
-#     # predict the values using our trained model
-#     y_predict = forest_model.predict(df_test_np)
-#
-#     np.savetxt("hw2-1-maxliu.csv", y_predict, delimiter=",")
-#
-#     return df_test, df_test_np
+def final_model():
+    '''
+    train the final chosen model using all of the training data
+    take those optimal parameters and predict the values of the test set
+    put the predicted values into a csv file
+    done.
+    '''
+    print("Currently running Support Vector Regression")
+    train_x, train_y, test_x = load_data()
+    # convert to np array
+    train_x = train_x.values
+    train_y = train_y.values
+    test_x = test_x.values
+    # convert the y values to log
+    train_y = log_transform(train_y, "forward")
+
+
+
+
+
+
+
+
+    np.savetxt("hwind-maxliu.csv", y_predict, delimiter=",")
+
+
+    # final chosen model is random forest regressor
+    # random forest parameters
+    kFold = 5
+    param_grid = {'n_estimators': np.arange(5, 40, 5),
+                    'max_features': np.array(['auto', 'sqrt', 'log2']),
+                    'max_depth': np.arange(2, 30)}
+    forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
+
+    # train using the all of the training cleaned data
+    y_np, x_np, df = load_data()
+    y_np_c, x_np_c, df_c = clean_data(df)
+
+    forest_grid.fit(x_np_c, y_np_c)
+    best_n = forest_grid.best_params_['n_estimators']
+    best_f = forest_grid.best_params_['max_features']
+    best_d = forest_grid.best_params_['max_depth']
+
+    print("Best n estimators:   %f" % best_n)
+    print("Best max features:   %s" % best_f)
+    print("Best max depth:      %f" % best_d)
+
+    # train a model using these best parameters
+    forest_model = RandomForestRegressor(n_estimators=best_n,
+                                        max_features=best_f,
+                                        max_depth=best_d)
+    forest_model.fit(x_np_c, y_np_c)
+
+    # import the test dataset
+    df_test = pd.read_csv("bike_test.csv")
+    # clean the data, the clean data function doesnt work for this dataframe
+    for feature in CONTINUOUS:
+        df_test[feature] = (df_test[feature] - df_test[feature].mean()) / \
+                        (df_test[feature].max() - df_test[feature].min())
+    df_test = df_test.drop(columns=['daylabel'])
+    df_test_np = df_test.values
+
+    # predict the values using our trained model
+    y_predict = forest_model.predict(df_test_np)
+
+    np.savetxt("hw2-1-maxliu.csv", y_predict, delimiter=",")
+
+    return df_test, df_test_np
 
 if __name__ == '__main__':
     run_models()
