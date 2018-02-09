@@ -10,9 +10,9 @@ def run_models():
     '''
     runs the different models
     '''
-    tree_regression()
+    # tree_regression()
     print("_______________")
-    random_forest()
+    # random_forest()
     print("_______________")
     # adaboost_regression()
     # print("_______________")
@@ -79,8 +79,8 @@ def adaboost_regression():
     # adaboost parameters
     kFold = 5
     param_grid = {'loss': np.array(['linear', 'square', 'exponential']),
-                    'learning_rate': np.arange(1, 101, 5)/100,
-                    'n_estimators': np.arange(40, 400, 20)}
+                    'learning_rate': np.arange(0.25, 1.25, 0.25),
+                    'n_estimators': np.arange(300, 500, 50)}
     adaboost_grid = GridSearchCV(AdaBoostRegressor(), param_grid, cv=kFold)
 
     # test using the training data
@@ -125,25 +125,21 @@ def random_forest():
 
     # random forest parameters
     kFold = 5
-    param_grid = {'n_estimators': np.arange(5, 40, 5),
-                    'max_features': np.array(['auto', 'sqrt', 'log2']),
-                    'max_depth': np.arange(2, 30)}
+    param_grid = {'n_estimators': np.arange(400, 800, 100),
+                    'max_features': np.array(['auto', 'sqrt', 'log2'])}
     forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
 
     # test using training data
     forest_grid.fit(x_train, y_train)
     best_n = forest_grid.best_params_['n_estimators']
     best_f = forest_grid.best_params_['max_features']
-    best_d = forest_grid.best_params_['max_depth']
 
     print("Best n estimators:   %f" % best_n)
     print("Best max features:   %s" % best_f)
-    print("Best max depth:      %f" % best_d)
 
     # train a model using these best parameters
     forest_model = RandomForestRegressor(n_estimators=best_n,
-                                        max_features=best_f,
-                                        max_depth=best_d)
+                                        max_features=best_f)
     forest_model.fit(x_train, y_train)
 
     y_predict = forest_model.predict(x_test)
@@ -172,9 +168,9 @@ def svm_regression():
 
     # support vector regression
     kFold = 5
-    param_grid = {'C': np.arange(0.1, 1.1, 0.1),
-                    'epsilon': np.arange(0.1, 1.1, 0.1),
-                    'kernel': ['linear', 'rbf', 'poly', 'sigmoid', 'precomputed']}
+    param_grid = {'C': np.arange(0.25, 1.25, 0.25),
+                    'epsilon': np.arange(0.25, 1.25, 0.25),
+                    'kernel': ['rbf', 'poly', 'sigmoid']}
     svr_grid = GridSearchCV(SVR(), param_grid, cv=kFold)
 
     # test using training data
