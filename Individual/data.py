@@ -138,10 +138,15 @@ def split_data(x_np, y_np, testing_percent=TESTING_SIZE, shuffle_data=SHUFFLE):
     note: if data is not enough, may just use all of the data to train and
             cross validate instead of taking out a testing set
     '''
-    x_train, x_test, y_train, y_test = train_test_split(x_np, y_np,
-                                                test_size=testing_percent,
-                                                random_state=20,
-                                                shuffle=shuffle_data)
+    try:
+        x_train, x_test, y_train, y_test = train_test_split(x_np, y_np,
+                                                    test_size=testing_percent,
+                                                    random_state=20,
+                                                    shuffle=shuffle_data)
+    except:
+        x_train, x_test, y_train, y_test = train_test_split(x_np, y_np,
+                                                    test_size=testing_percent,
+                                                    random_state=20)
 
     return x_train, x_test, y_train, y_test
 
