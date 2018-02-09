@@ -117,8 +117,12 @@ def load_data():
     train_y = df_train['SalePrice']
     try:
         train_x = df_train.drop(columns=['SalePrice'])
+        train_x = train_x.drop(columns=['Order'])
+        train_x = train_x.drop(columns=['PID'])
     except:
         train_x = df_train.drop("SalePrice", axis=1)
+        train_x = train_x.drop("Order", axis=1)
+        train_x = train_x.drop("PID", axis=1)
     # confirm that we have removed SalePrice from x training data
     if 'SalePrice' in train_x.columns:
         print('ERROR: SalePrice was not removed from the training data')
@@ -126,6 +130,12 @@ def load_data():
     # we also need to transform the
     # load the testing data
     df_test = pd.read_csv(OUTPUT_TEST)
+    try:
+        df_test = df_test.drop(columns=['Order'])
+        df_test = df_test.drop(columns=['PID'])
+    except:
+        df_test = df_test.drop("Order", axis=1)
+        df_test = df_test.drop("PID", axis=1)
 
     return train_x, train_y, df_test
 

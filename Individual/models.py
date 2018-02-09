@@ -10,10 +10,10 @@ def run_models():
     '''
     runs the different models
     '''
-    # tree_regression()
-    # print("_______________")
-    # random_forest()
-    # print("_______________")
+    tree_regression()
+    print("_______________")
+    random_forest()
+    print("_______________")
     # adaboost_regression()
     # print("_______________")
     svm_regression()
@@ -195,7 +195,7 @@ def svm_regression():
     mse = mean_squared_error(y_predict, y_test)
     r2 = svr_model.score(x_test, y_test)
 
-    print("Performance of random forest regression")
+    print("Performance of support vector regression")
     print("Mean Squared Error:  %f" % mse)
     print("RMSE:                %f" % (mse ** 0.5))
     print("R^2:                 %f" % r2)
