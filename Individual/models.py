@@ -11,9 +11,9 @@ def run_models():
     '''
     tree_regression()
     print("_______________")
-    adaboost_regression()
-    print("_______________")
     random_forest()
+    print("_______________")
+    adaboost_regression()
     print("_______________")
 
 
