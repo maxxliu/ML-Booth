@@ -88,6 +88,19 @@ a RMSE of 0.144.
 
 ## 3.4 Support Vector Regression
 
+Surprisingly, the results from our support vector regression are quite poor.
+For the kernel type we used a rbf kernel, this is primarily because it was
+extremely computationally expensive to test the poly and linear kernels and the
+run time would have been unreasonable (after multiple hours the model was still
+not done training). We found the optimal C and epsilon were 0.25 and 0.1 respectively.
+Using these parameters we find almost no correlation between our data with the
+sale price. The $R^2$ was 0.001 and the RMSE was 0.392. Even when we increased
+the value of C to greater than 1000, we continue to get very poor results.
+This inaccuracy is most
+likely due to the random label encoding of the features. It would probably be
+extremely difficult for the support vector machine to distinguish between these
+effectively.
+
 # 4. Conclusion
 
 | Model          | MSE     | RMSE     | $R^2$     |
@@ -95,4 +108,11 @@ a RMSE of 0.144.
 | Tree           | 0.042   | 0.204    | 0.730     |
 | AdaBoost       | 0.029   | 0.172    | 0.808     |
 | Random Forest  | 0.021   | 0.144    | 0.865     |
-| Support Vector | 0   | 0    | 0     |
+| Support Vector | 0.154   | 0.392    | 0.001     |
+
+As we can observe, the best model for this problem is a random forest regression.
+We then run the random forest regression over all of our training data and
+find that the best parameters are 600 n-estimators, and uses square root n-features.
+These parameters were then used to predict the log price of each home. The final
+csv file with the sale price predictions are transformed back from the log value
+into the actual sale value.

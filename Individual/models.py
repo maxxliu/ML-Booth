@@ -10,14 +10,15 @@ def run_models():
     '''
     runs the different models
     '''
-    tree_regression()
-    print("_______________")
-    random_forest()
-    print("_______________")
+    # tree_regression()
+    # print("_______________")
+    # random_forest()
+    # print("_______________")
     # adaboost_regression()
     # print("_______________")
-    svm_regression()
-    print("_______________")
+    # svm_regression()
+    # print("_______________")
+    final_model()
 
 
 def tree_regression():
@@ -125,7 +126,7 @@ def random_forest():
 
     # random forest parameters
     kFold = 5
-    param_grid = {'n_estimators': np.arange(5, 40, 5),
+    param_grid = {'n_estimators': np.arange(200, 900, 100),
                     'max_features': np.array(['auto', 'sqrt', 'log2']),
                     'max_depth': np.arange(2, 30)}
     forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
@@ -172,9 +173,9 @@ def svm_regression():
 
     # support vector regression
     kFold = 5
-    param_grid = {'C': np.arange(0.1, 1.1, 0.1),
-                    'epsilon': np.arange(0.1, 1.1, 0.1),
-                    'kernel': ['linear', 'rbf', 'poly', 'sigmoid', 'precomputed']}
+    param_grid = {'C': np.arange(700, 1200, 100),
+                    'epsilon': np.arange(0.1, 0.30, 0.05),
+                    'kernel': ['rbf']}
     svr_grid = GridSearchCV(SVR(), param_grid, cv=kFold)
 
     # test using training data
@@ -208,7 +209,6 @@ def final_model():
     put the predicted values into a csv file
     done.
     '''
-    print("Currently running Support Vector Regression")
     train_x, train_y, test_x = load_data()
     # convert to np array
     train_x = train_x.values
@@ -217,58 +217,39 @@ def final_model():
     # convert the y values to log
     train_y = log_transform(train_y, "forward")
 
+    # want to double check the shape of train_x and test_x are the same
+    if test_x.shape[1] == train_x.shape[1]:
+        print("Correct size")
+    else:
+        print("ERROR: sizing is wrong")
+        return
 
-
-
-
-
-
-
-    np.savetxt("hwind-maxliu.csv", y_predict, delimiter=",")
-
-
-    # final chosen model is random forest regressor
+    # random forest regressor is our best model
     # random forest parameters
     kFold = 5
-    param_grid = {'n_estimators': np.arange(5, 40, 5),
-                    'max_features': np.array(['auto', 'sqrt', 'log2']),
-                    'max_depth': np.arange(2, 30)}
+    param_grid = {'n_estimators': np.arange(600, 900, 100),
+                    'max_features': np.array(['sqrt'])}
     forest_grid = GridSearchCV(RandomForestRegressor(), param_grid, cv=kFold)
 
-    # train using the all of the training cleaned data
-    y_np, x_np, df = load_data()
-    y_np_c, x_np_c, df_c = clean_data(df)
-
-    forest_grid.fit(x_np_c, y_np_c)
+    print("Currently running final model and creating csv")
+    # test using training data
+    forest_grid.fit(train_x, train_y)
     best_n = forest_grid.best_params_['n_estimators']
     best_f = forest_grid.best_params_['max_features']
-    best_d = forest_grid.best_params_['max_depth']
 
     print("Best n estimators:   %f" % best_n)
     print("Best max features:   %s" % best_f)
-    print("Best max depth:      %f" % best_d)
 
     # train a model using these best parameters
     forest_model = RandomForestRegressor(n_estimators=best_n,
-                                        max_features=best_f,
-                                        max_depth=best_d)
-    forest_model.fit(x_np_c, y_np_c)
+                                        max_features=best_f)
+    forest_model.fit(train_x, train_y)
 
-    # import the test dataset
-    df_test = pd.read_csv("bike_test.csv")
-    # clean the data, the clean data function doesnt work for this dataframe
-    for feature in CONTINUOUS:
-        df_test[feature] = (df_test[feature] - df_test[feature].mean()) / \
-                        (df_test[feature].max() - df_test[feature].min())
-    df_test = df_test.drop(columns=['daylabel'])
-    df_test_np = df_test.values
+    y_predict = forest_model.predict(test_x)
+    y_predict = log_transform(y_predict, "backward")
 
-    # predict the values using our trained model
-    y_predict = forest_model.predict(df_test_np)
+    np.savetxt("hwind-maxliu.csv", y_predict, delimiter=",")
 
-    np.savetxt("hw2-1-maxliu.csv", y_predict, delimiter=",")
-
-    return df_test, df_test_np
 
 if __name__ == '__main__':
     run_models()
